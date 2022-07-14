@@ -1,0 +1,35 @@
+<script lang="ts" setup>
+import { useAlerts } from "@/stores/alerts";
+
+import {
+  Notification,
+  NotificationGroup,
+} from "@progress/kendo-vue-notification";
+
+import { Fade } from "@progress/kendo-vue-animation";
+
+import { storeToRefs } from "pinia";
+import { reactive } from "vue";
+
+const store = useAlerts();
+const { notify, remove } = store;
+
+const { items } = storeToRefs(store);
+</script>
+
+<template>
+  <div class="z-10">
+    <NotificationGroup>
+      <Fade v-for="alert in items" :key="alert.id" appear>
+        <Notification
+          :type="{ style: alert.style, icon: true }"
+          :closable="alert.closable"
+          @close="remove(alert.id)"
+        >
+          <div v-if="alert.html" v-html="alert.message"></div>
+          <span v-else>{{ alert.message }}</span>
+        </Notification>
+      </Fade>
+    </NotificationGroup>
+  </div>
+</template>
