@@ -28,6 +28,10 @@ const boards = ref<Partial<Board>[]>([
 
 const alerts = useAlerts();
 
+alerts.success("Board created!");
+alerts.error("Board created!");
+alerts.info("Board created!");
+
 function createBoard() {
   console.log("Create a new board");
 }
