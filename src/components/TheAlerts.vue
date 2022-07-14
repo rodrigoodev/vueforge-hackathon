@@ -19,7 +19,14 @@ const { items } = storeToRefs(store);
 
 <template>
   <div class="z-10">
-    <NotificationGroup>
+    <NotificationGroup
+      :style="{
+        right: '10px',
+        bottom: '10px',
+        alignItems: 'flex-start',
+        flexWrap: 'wrap-reverse',
+      }"
+    >
       <Fade v-for="alert in items" :key="alert.id" appear>
         <Notification
           :type="{ style: alert.style, icon: true }"
