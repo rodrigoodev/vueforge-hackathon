@@ -2,56 +2,76 @@
 import { useAlerts } from "@/stores/alerts";
 import type { Board } from "@/types";
 import { ref } from "vue";
-const boards = ref<Partial<Board>[]>([
-  {
-    id: "1",
-    title: "My First Board",
-    order: "[]",
-    image: {
-      downloadUrl: "https://picsum.photos/480/270?board=1",
-    },
-  },
-  {
-    id: "2",
-    title: "My Second Board",
-    order: "[]",
-    image: {
-      downloadUrl: "https://picsum.photos/480/270?board=2",
-    },
-  },
-  {
-    id: "3",
-    title: "My Third Board",
-    order: "https://picsum.photos/480/270?watermelon=3",
-  },
-  {
-    id: "4",
-    title: "And another one",
-    order: "https://picsum.photos/480/270?watermelon=4",
-  },
-  {
-    id: "5",
-    title: "Cute boardie",
-    order: "https://picsum.photos/480/270?watermelon=5",
-  },
-  {
-    id: "6",
-    title: "Serious corpo board",
-    order: "https://picsum.photos/480/270?watermelon=6",
-  },
-]);
+import createBoardMutation from "@/graphql/mutations/createBoard.mutation.gql";
+import boardsQuery from "@/graphql/queries/boards.query.gql";
+import { useMutation, useQuery } from "@vue/apollo-composable";
+import { computed } from "@vue/reactivity";
+
+const { result, loading, onError } = useQuery(boardsQuery);
+const boards = computed(() => result?.value.boardsList?.items || []);
+
+// const boards = ref<Partial<Board>[]>([
+//   {
+//     id: "1",
+//     title: "My First Board",
+//     order: "[]",
+//     image: {
+//       downloadUrl: "https://picsum.photos/480/270?board=1",
+//     },
+//   },
+//   {
+//     id: "2",
+//     title: "My Second Board",
+//     order: "[]",
+//     image: {
+//       downloadUrl: "https://picsum.photos/480/270?board=2",
+//     },
+//   },
+//   {
+//     id: "3",
+//     title: "My Third Board",
+//     order: "https://picsum.photos/480/270?watermelon=3",
+//   },
+//   {
+//     id: "4",
+//     title: "And another one",
+//     order: "https://picsum.photos/480/270?watermelon=4",
+//   },
+//   {
+//     id: "5",
+//     title: "Cute boardie",
+//     order: "https://picsum.photos/480/270?watermelon=5",
+//   },
+//   {
+//     id: "6",
+//     title: "Serious corpo board",
+//     order: "https://picsum.photos/480/270?watermelon=6",
+//   },
+// ]);
 
 const alerts = useAlerts();
 
-alerts.success("Board created!");
-alerts.error("Board created!");
-alerts.info("Board created!");
+onError(() => {
+  alerts.error("Houve um erro ao carregar os boards");
+});
 
-function createBoard() {
-  console.log("Create a new board");
-}
+const { mutate: createBoard } = useMutation(createBoardMutation, () => ({
+  update(cache, { data: { boardCreate } }) {
+    cache.updateQuery({ query: boardsQuery }, (res) => ({
+      boardsList: {
+        items: [...res.boardsList.items, boardCreate],
+      },
+    }));
+  },
+}));
 
-const getCoolGradient = (index) => {
+const newBoardPayload = {
+  data: {
+    title: "test board",
+  },
+};
+
+const getCoolGradient = (index: any) => {
   let finalGradientString = "";
   switch (index) {
     case 1:
@@ -72,7 +92,8 @@ const getCoolGradient = (index) => {
 
 <template>
   <h1 class="mb-5 text-3xl">Boards</h1>
-  <div class="flex flex-wrap gap-2">
+  <p v-if="loading">Loading...</p>
+  <div v-else class="flex flex-wrap gap-2">
     <div
       class="border rounded-md bg-gradient-to-tr"
       v-for="(board, index) in boards"
@@ -84,7 +105,7 @@ const getCoolGradient = (index) => {
         class="transition duration-100 ease-in border rounded-md hover:-rotate-3"
       />
     </div>
-    <button class="text-gray-500" @click="createBoard()">
+    <button class="text-gray-500" @click="createBoard(newBoardPayload)">
       <span>New Board +</span>
     </button>
   </div>
