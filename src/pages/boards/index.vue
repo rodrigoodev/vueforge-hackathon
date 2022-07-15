@@ -4,6 +4,7 @@ import boardsQuery from "@/graphql/queries/boards.query.gql";
 import createBoardMutation from "@/graphql/mutations/createBoard.mutation.gql";
 import { useMutation, useQuery } from "@vue/apollo-composable";
 import { computed } from "vue";
+import router from "@/router";
 
 const { result, loading, onError } = useQuery(boardsQuery);
 const boards = computed(() => result.value?.boardsList?.items || []);
@@ -22,13 +23,18 @@ const { mutate: createBoard } = useMutation(createBoardMutation, () => ({
   },
 }));
 
-const newBoardPayload = {
-  data: {
-    title: "Test board 2",
-  },
-};
+async function handleBoardCreate() {
+  const newBoardPayload = {
+    data: {
+      title: "My New Board",
+    },
+  };
+  const res = await createBoard(newBoardPayload);
+  alerts.success("New Board created!");
+  router.push(`/boards/${res?.data.boardCreate.id}`);
+}
 
-const getCoolGradient = (index: any) => {
+const getCoolGradient = (index: number) => {
   let finalGradientString = "";
   switch (index) {
     case 1:
@@ -61,7 +67,7 @@ const getCoolGradient = (index: any) => {
         class="transition duration-100 ease-in border rounded-md hover:-rotate-3"
       />
     </div>
-    <button class="text-gray-500" @click="createBoard(newBoardPayload)">
+    <button class="text-gray-500" @click="handleBoardCreate">
       <span>New Board +</span>
     </button>
   </div>
