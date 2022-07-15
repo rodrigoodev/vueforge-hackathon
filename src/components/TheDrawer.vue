@@ -62,7 +62,7 @@ function onSelect({ itemIndex }: { itemIndex: number }) {
     @select="onSelect"
   >
     <DrawerContent>
-      <div class="px-5">
+      <div class="p-5">
         <router-view />
       </div>
     </DrawerContent>
